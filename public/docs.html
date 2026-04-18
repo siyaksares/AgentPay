@@ -153,9 +153,9 @@
     <section id="flow">
       <h2>ERC-8183 Job Lifecycle</h2>
       <div class="fs">
-        <div class="fs-item"><div class="sn">1</div><div class="sb"><h3>Initiate Transfer</h3><p>Agent calls <code>POST /api/pay/transfer</code>. Server creates a Circle USDC transfer on ARC Testnet.</p></div></div>
-        <div class="fs-item"><div class="sn">2</div><div class="sb"><h3>Poll for Confirmation</h3><p>Agent polls <code>GET /api/pay/status/:id</code> until state reaches <code>COMPLETE</code>. Takes 3–8 seconds.</p></div></div>
-        <div class="fs-item"><div class="sn">3</div><div class="sb"><h3>Present Proof & Receive Data</h3><p>Agent calls gated endpoint with <code>X-Payment-Id</code> header. Middleware verifies and responds.</p></div></div>
+        <div class="fs-item"><div class="sn">1</div><div class="sb"><h3>Post Job</h3><p>Agent calls <code>POST /api/job/create</code>. Job is posted on-chain with work definition and USDC escrowed.</p></div></div>
+        <div class="fs-item"><div class="sn">2</div><div class="sb"><h3>Job Accepted</h3><p>Provider accepts the job on-chain. Agent polls <code>GET /api/job/status/:id</code> until state reaches <code>ACCEPTED</code>.</p></div></div>
+        <div class="fs-item"><div class="sn">3</div><div class="sb"><h3>Payment Released</h3><p>Agent calls gated endpoint with <code>X-Job-Id</code> header. On verified completion, USDC escrow is released trustlessly.</p></div></div>
       </div>
     </section>
     <section id="tech">
@@ -180,7 +180,7 @@
     </section>
     <section id="auth">
       <h2>Authentication</h2>
-      <p>All gated endpoints require a valid Circle transfer ID as HTTP header:</p>
+      <p>All gated endpoints require a valid ERC-8183 job ID as HTTP header:</p>
       <pre>X-Job-Id: a1b2c3d4-e5f6-7890-abcd-ef1234567890</pre>
       <p>Each job ID can only be used <strong>once</strong>. Reuse returns <code>402 Job Already Settled</code>.</p>
     </section>
