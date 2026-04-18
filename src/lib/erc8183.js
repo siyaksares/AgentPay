@@ -1,108 +1,131 @@
 const { initiateDeveloperControlledWalletsClient } = require('@circle-fin/developer-controlled-wallets')
 const config = require('../config')
 
-const client = initiateDeveloperControlledWalletsClient({
-  apiKey: config.circle.apiKey,
-  entitySecret: config.circle.entitySecret,
-})
+const ERC8183_CONTRACT = '0x0747EEf0706327138c69792bF28Cd525089e4583'
+const USDC_CONTRACT = '0x3600000000000000000000000000000000000000'
+const JOB_PRICE_RAW = '1' // 0.000001 USDC
 
-const ERC_8183 = '0x0747EEf0706327138c69792bF28Cd525089e4583'
-const USDC = '0x3600000000000000000000000000000000000000'
-const BLOCKCHAIN = 'ARC-TESTNET'
+function getClient() {
+  return initiateDeveloperControlledWalletsClient({
+    apiKey: process.env.CIRCLE_API_KEY,
+    entitySecret: process.env.CIRCLE_ENTITY_SECRET,
+  })
+}
 
-// Create a job on ERC-8183 contract
-async function createJob({ providerAddress, description, budgetUsdc = '1000' }) {
+async function waitForTx(client, txId, maxAttempts = 20) {
+  const terminal = new Set(['COMPLETE', 'FAILED', 'CANCELLED'])
+  for (let i = 0; i < maxAttempts; i++) {
+    const res = await client.getTransaction({ id: txId })
+    const tx = res.data?.transaction
+    if (tx && terminal.has(tx.state)) return tx
+    await new Promise(r => setTimeout(r, 2000))
+  }
+  throw new Error('Transaction timeout')
+}
+
+// Create an ERC-8183 job on-chain
+// Returns { jobId, txHash, state: 'FUNDED' }
+async function createJob({ providerAddress, description, walletId }) {
+  const client = getClient()
+  const apiWalletId = process.env.API_WALLET_ID
+  const apiWalletAddress = process.env.API_WALLET_ADDRESS
+
+  // Step 1: createJob on-chain
   const expiredAt = Math.floor(Date.now() / 1000) + 3600 // 1 hour
-
-  const tx = await client.createContractExecutionTransaction({
-    walletAddress: config.wallet.apiWalletAddress,
-    blockchain: BLOCKCHAIN,
-    contractAddress: ERC_8183,
+  const createTx = await client.createContractExecutionTransaction({
+    walletId: apiWalletId,
+    contractAddress: ERC8183_CONTRACT,
+    blockchain: 'ARC-TESTNET',
     abiFunctionSignature: 'createJob(address,address,uint256,string,address)',
     abiParameters: [
-      providerAddress,
-      config.wallet.apiWalletAddress, // evaluator = server
+      providerAddress || apiWalletAddress,
+      apiWalletAddress, // evaluator = API itself
       `${expiredAt}`,
       description,
       '0x0000000000000000000000000000000000000000',
     ],
     fee: { type: 'level', config: { feeLevel: 'MEDIUM' } },
   })
+  const createTxId = createTx.data?.id
+  const createResult = await waitForTx(client, createTxId)
+  if (createResult.state !== 'COMPLETE') throw new Error('createJob tx failed')
 
-  return tx.data?.transaction
-}
+  // Get jobId from logs (use txHash as proxy jobId if needed)
+  const jobId = createResult.txHash
 
-// Set budget for a job
-async function setBudget({ jobId, amountUsdc }) {
-  const amount = Math.floor(parseFloat(amountUsdc) * 1e6).toString()
-
-  const tx = await client.createContractExecutionTransaction({
-    walletAddress: config.wallet.agentWalletAddress,
-    blockchain: BLOCKCHAIN,
-    contractAddress: ERC_8183,
-    abiFunctionSignature: 'setBudget(uint256,uint256,bytes)',
-    abiParameters: [jobId.toString(), amount, '0x'],
-    fee: { type: 'level', config: { feeLevel: 'MEDIUM' } },
-  })
-
-  return tx.data?.transaction
-}
-
-// Approve + Fund job into escrow
-async function fundJob({ jobId, amountUsdc }) {
-  const amount = Math.floor(parseFloat(amountUsdc) * 1e6).toString()
-
-  // Approve
+  // Step 2: setBudget
   await client.createContractExecutionTransaction({
-    walletAddress: config.wallet.agentWalletAddress,
-    blockchain: BLOCKCHAIN,
-    contractAddress: USDC,
+    walletId: apiWalletId,
+    contractAddress: ERC8183_CONTRACT,
+    blockchain: 'ARC-TESTNET',
+    abiFunctionSignature: 'setBudget(uint256,uint256,bytes)',
+    abiParameters: [jobId, JOB_PRICE_RAW, '0x'],
+    fee: { type: 'level', config: { feeLevel: 'MEDIUM' } },
+  })
+
+  // Step 3: approve USDC
+  await client.createContractExecutionTransaction({
+    walletId: apiWalletId,
+    contractAddress: USDC_CONTRACT,
+    blockchain: 'ARC-TESTNET',
     abiFunctionSignature: 'approve(address,uint256)',
-    abiParameters: [ERC_8183, amount],
+    abiParameters: [ERC8183_CONTRACT, JOB_PRICE_RAW],
     fee: { type: 'level', config: { feeLevel: 'MEDIUM' } },
   })
 
-  // Fund
-  const tx = await client.createContractExecutionTransaction({
-    walletAddress: config.wallet.agentWalletAddress,
-    blockchain: BLOCKCHAIN,
-    contractAddress: ERC_8183,
+  // Step 4: fund — USDC into escrow
+  const fundTx = await client.createContractExecutionTransaction({
+    walletId: apiWalletId,
+    contractAddress: ERC8183_CONTRACT,
+    blockchain: 'ARC-TESTNET',
     abiFunctionSignature: 'fund(uint256,bytes)',
-    abiParameters: [jobId.toString(), '0x'],
+    abiParameters: [jobId, '0x'],
     fee: { type: 'level', config: { feeLevel: 'MEDIUM' } },
   })
+  const fundResult = await waitForTx(client, fundTx.data?.id)
 
-  return tx.data?.transaction
+  return {
+    jobId,
+    txHash: fundResult.txHash,
+    state: 'FUNDED',
+    contractAddress: ERC8183_CONTRACT,
+    arcScanUrl: `https://testnet.arcscan.app/tx/${fundResult.txHash}`,
+  }
 }
 
-// Submit deliverable
-async function submitJob({ jobId, deliverableHash }) {
-  const tx = await client.createContractExecutionTransaction({
-    walletAddress: config.wallet.agentWalletAddress,
-    blockchain: BLOCKCHAIN,
-    contractAddress: ERC_8183,
+// Submit deliverable and complete job — releases USDC escrow
+async function completeJob({ jobId, deliverableHash }) {
+  const client = getClient()
+  const apiWalletId = process.env.API_WALLET_ID
+
+  // submit deliverable
+  const submitTx = await client.createContractExecutionTransaction({
+    walletId: apiWalletId,
+    contractAddress: ERC8183_CONTRACT,
+    blockchain: 'ARC-TESTNET',
     abiFunctionSignature: 'submit(uint256,bytes32,bytes)',
-    abiParameters: [jobId.toString(), deliverableHash, '0x'],
+    abiParameters: [jobId, deliverableHash || '0x' + '0'.repeat(64), '0x'],
     fee: { type: 'level', config: { feeLevel: 'MEDIUM' } },
   })
+  await waitForTx(client, submitTx.data?.id)
 
-  return tx.data?.transaction
-}
-
-// Complete job → release payment
-async function completeJob({ jobId }) {
-  const reasonHash = '0x' + Buffer.from('API_DELIVERED').toString('hex').padEnd(64, '0')
-
-  const tx = await client.createContractExecutionTransaction({
-    walletAddress: config.wallet.apiWalletAddress, // evaluator
-    blockchain: BLOCKCHAIN,
-    contractAddress: ERC_8183,
+  // complete — evaluator releases payment
+  const completeTx = await client.createContractExecutionTransaction({
+    walletId: apiWalletId,
+    contractAddress: ERC8183_CONTRACT,
+    blockchain: 'ARC-TESTNET',
     abiFunctionSignature: 'complete(uint256,bytes32,bytes)',
-    abiParameters: [jobId.toString(), reasonHash, '0x'],
+    abiParameters: [jobId, '0x' + '0'.repeat(64), '0x'],
     fee: { type: 'level', config: { feeLevel: 'MEDIUM' } },
   })
+  const completeResult = await waitForTx(client, completeTx.data?.id)
 
-  return tx.data?.transaction
+  return {
+    jobId,
+    txHash: completeResult.txHash,
+    state: 'COMPLETED',
+    arcScanUrl: `https://testnet.arcscan.app/tx/${completeResult.txHash}`,
+  }
 }
 
-module.exports = { createJob, setBudget, fundJob, submitJob, completeJob, ERC_8183, USDC }
+module.exports = { createJob, completeJob }

@@ -1,60 +1,65 @@
-const { verifyPayment } = require('../lib/circle')
+const { jobs } = require('../routes/jobs')
 const { isPaymentUsed, markPaymentUsed, recordTransaction } = require('../store')
 
-// Middleware: requires a valid, unused Circle transfer ID in the X-Payment-Id header.
-//
-// Flow:
-//   1. Extract X-Payment-Id from request headers
-//   2. Check it hasn't been spent already (replay protection)
-//   3. Verify with Circle API: COMPLETE state, correct destination, correct amount
-//   4. Mark as used and record the transaction
-//   5. Attach payment metadata to req.payment and call next()
 async function requirePayment(req, res, next) {
-  const paymentId = req.headers['x-payment-id']
+  const jobId = req.headers['x-job-id']
 
-  if (!paymentId) {
+  if (!jobId) {
     return res.status(402).json({
       error: 'Payment Required',
-      message: 'Include a Circle transfer ID in the X-Payment-Id header.',
-      hint: 'POST /api/pay/initiate to start a payment, then poll /api/pay/status/:id',
+      message: 'Include a valid ERC-8183 job ID in the X-Job-Id header.',
+      hint: 'POST /api/job/create to create a funded job, then use the jobId here.',
     })
   }
 
-  if (isPaymentUsed(paymentId)) {
+  if (isPaymentUsed(jobId)) {
     return res.status(402).json({
-      error: 'Payment Already Used',
-      message: `Transfer ${paymentId} has already been used for an API request.`,
+      error: 'Job Already Settled',
+      message: `Job ${jobId} has already been used for an API request.`,
     })
   }
 
-  let verification
-  try {
-    verification = await verifyPayment(paymentId)
-  } catch (err) {
+  const job = jobs.get(jobId)
+  if (!job) {
     return res.status(402).json({
-      error: 'Payment Verification Failed',
-      message: err.message,
+      error: 'Job Not Found',
+      message: `No ERC-8183 job found with ID ${jobId}. Create one via POST /api/job/create.`,
     })
   }
 
-  if (!verification.valid) {
+  if (job.state !== 'FUNDED' && job.state !== 'ACCEPTED') {
     return res.status(402).json({
-      error: 'Invalid Payment',
-      message: verification.reason,
+      error: 'Job Not Funded',
+      message: `Job state is ${job.state}. Job must be FUNDED before use.`,
+      arcScanUrl: job.arcScanUrl,
     })
   }
 
-  // Atomically mark as used and record
-  markPaymentUsed(paymentId)
+  // Mark as used (replay protection)
+  markPaymentUsed(jobId)
+
+  // Attach job info to request
+  req.job = job
+  req.payment = {
+    paymentId: jobId,
+    txHash: job.txHash,
+    fromAddress: job.providerAddress || process.env.API_WALLET_ADDRESS,
+    amount: '0.000001',
+  }
+
   recordTransaction({
-    paymentId,
-    txHash: verification.txHash,
-    fromAddress: verification.fromAddress,
-    amount: verification.amount,
+    paymentId: jobId,
+    txHash: job.txHash,
+    fromAddress: req.payment.fromAddress,
+    amount: '0.000001',
     endpoint: req.path,
   })
 
-  req.payment = verification
+  // Mark job as COMPLETED after delivery
+  job.state = 'COMPLETED'
+  job.completedAt = new Date().toISOString()
+  jobs.set(jobId, job)
+
   next()
 }
 
