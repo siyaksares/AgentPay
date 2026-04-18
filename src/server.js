@@ -13,6 +13,7 @@ app.use(express.static(path.join(__dirname, '../public')))
 // ─── Routes ────────────────────────────────────────────────────────────────────
 app.use('/api/weather', require('./routes/weather'))
 app.use('/api/pay', require('./routes/payment'))
+app.use('/api/job', require('./routes/job'))
 app.use('/api/exchange', require('./routes/exchange'))
 app.use('/api/dashboard', require('./routes/dashboard'))
 
