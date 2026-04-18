@@ -603,7 +603,7 @@
     <span class="hero-line hero-l1"><span class="grad">AgentPay</span></span>
     <span class="hero-line hero-l2"><span class="grad">Payment Layer</span> for the <span class="grad">Agentic Economy</span></span>
     <span class="hero-line hero-l3">Any agent, any API, settled instantly on <span class="grad">Arc</span>.</span>
-    <span class="hero-line hero-l4">Per-request USDC micropayments — no subscriptions, no gas overhead.</span>
+    <span class="hero-line hero-l4">ERC-8183 powered escrow — job defined, USDC locked, payment released on delivery.</span>
   </div>
 
   <!-- ── Network info ─────────────────────────────────────────────── -->
@@ -676,30 +676,30 @@
       <div class="step">
         <div class="step-head">
           <div class="step-num">1</div>
-          <div class="step-title">Agent requests API</div>
+          <div class="step-title">Agent creates ERC-8183 Job</div>
         </div>
-        <div class="step-desc">Autonomous agent initiates an API call to a gated endpoint</div>
+        <div class="step-desc">Agent calls POST /api/job/create — ERC-8183 job defined on Arc Testnet</div>
       </div>
       <div class="step">
         <div class="step-head">
           <div class="step-num">2</div>
-          <div class="step-title">AgentPay gates with USDC</div>
+          <div class="step-title">USDC Escrowed On-Chain</div>
         </div>
-        <div class="step-desc">Middleware requires a Circle USDC transfer before processing</div>
+        <div class="step-desc">USDC locked into ERC-8183 escrow contract — funds held until delivery</div>
       </div>
       <div class="step">
         <div class="step-head">
           <div class="step-num">3</div>
-          <div class="step-title">Payment confirmed on Arc</div>
+          <div class="step-title">Deliverable Submitted & Verified</div>
         </div>
-        <div class="step-desc">Circle verifies the transfer is COMPLETE on Arc L1 — no trust needed</div>
+        <div class="step-desc">Agent submits deliverable hash on-chain — evaluator verifies work</div>
       </div>
       <div class="step">
         <div class="step-head">
           <div class="step-num">4</div>
-          <div class="step-title">API responds</div>
+          <div class="step-title">Payment Released via ERC-8183</div>
         </div>
-        <div class="step-desc">Payment ID clears replay protection, endpoint delivers its response</div>
+        <div class="step-desc">ERC-8183 complete() releases USDC to provider — trustless settlement</div>
       </div>
     </div>
   </div>
