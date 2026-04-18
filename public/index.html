@@ -808,9 +808,9 @@
       tbody.innerHTML = data.recentTransactions.map(tx => {
         const isNew = !seenIds.has(tx.paymentId)
         if (isNew) seenIds.add(tx.paymentId)
-        const explorerUrl = tx.txHash
+        const explorerUrl = tx.txHash && tx.txHash !== 'null'
           ? `https://testnet.arcscan.app/tx/${tx.txHash}`
-          : `https://testnet.arcscan.app/search?q=${tx.paymentId}`
+          : `https://testnet.arcscan.app/address/${tx.fromAddress || '0xc321eefd3373bc52e9c21127c58e10c6bb374933'}`
         const idCell = `<a class="tx-id-link" href="${explorerUrl}" target="_blank" rel="noopener noreferrer">${shorten(tx.paymentId)}</a>`
         return `
           <tr class="${isNew ? 'new-row' : ''}">
