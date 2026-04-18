@@ -120,7 +120,7 @@ async function runAgentDemo() {
   console.log('╔══════════════════════════════════════════════════╗')
   console.log(`║  Results: ${passed} passed, ${failed} failed                        ║`)
   console.log('║  ERC-8183 Contract: 0x0747EEf...4583            ║')
-  console.log('║  Network: Arc Testnet (Chain ID 1116)            ║')
+  console.log('║  Network: Arc Testnet (Chain ID 5042002)            ║')
   console.log('╚══════════════════════════════════════════════════╝\n')
 }
 
