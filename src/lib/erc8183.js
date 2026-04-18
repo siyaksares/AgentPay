@@ -13,13 +13,13 @@ function getClient() {
 }
 
 async function waitForTx(client, txId, maxAttempts = 20) {
-  const terminal = new Set(['COMPLETE', 'FAILED', 'CANCELLED'])
+  const terminal = new Set(['COMPLETE', 'FAILED', 'CANCELLED', 'CLEARED'])
   for (let i = 0; i < maxAttempts; i++) {
     const res = await client.getTransaction({ id: txId })
     const tx = res.data?.transaction
     console.log(`[waitForTx] attempt ${i+1}: state=${tx?.state}, txHash=${tx?.txHash}`)
     if (tx && terminal.has(tx.state)) {
-      tx.txHash = tx.txHash || tx.transactionHash || null
+      tx.txHash = tx.txHash || tx.transactionHash || tx.txHashes?.[0] || null
       return tx
     }
     await new Promise(r => setTimeout(r, 2000))
