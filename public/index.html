@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgentPay — Payment Dashboard</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #080B12;
+      --surface:  #0D1119;
+      --surface-2:#111826;
+      --border:   #1C2438;
+      --border-2: #2A3550;
+      --accent:   #0052FF;
+      --accent-2: #003DBF;
+      --green:    #1DB96A;
+      --red:      #E5484D;
+      --text:     #E8EDF4;
+      --text-2:   #6B7A99;
+      --text-3:   #36435C;
+      --mono:     'SF Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;
+      --sans:     -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', system-ui, sans-serif;
+    }
+
+    html { font-size: 14px; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Top accent bar ─────────────────────────────────────────── */
+    .top-bar {
+      height: 2px;
+      background: var(--accent);
+    }
+
+    /* ── Page layout ────────────────────────────────────────────── */
+    .page {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 24px 64px;
+    }
+
+    /* ── Header ─────────────────────────────────────────────────── */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 0 18px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-mark {
+      width: 32px;
+      height: 32px;
+      flex-shrink: 0;
+    }
+
+    .wordmark {
+      font-family: var(--sans);
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: var(--text);
+    }
+
+    .wordmark span {
+      color: var(--accent);
+    }
+
+    .header-sep {
+      width: 1px;
+      height: 16px;
+      background: var(--border-2);
+      margin: 0 4px;
+    }
+
+    /* ── Hero pyramid ───────────────────────────────────────────── */
+    .hero {
+      text-align: center;
+      padding: 36px 0 32px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+
+    .hero-line {
+      display: block;
+      line-height: 1.25;
+    }
+
+    .hero-line + .hero-line { margin-top: 10px; }
+
+    .hero-l1 {
+      font-size: 42px;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+
+    .hero-l2 {
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -0.2px;
+      color: var(--text);
+    }
+
+    .hero-l3 {
+      font-size: 16px;
+      font-weight: 400;
+      color: var(--text-2);
+      margin-top: 14px !important;
+    }
+
+    .hero-l4 {
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--text-3);
+      margin-top: 6px !important;
+    }
+
+    .grad {
+      background: linear-gradient(90deg, #0052FF 0%, #00D4FF 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 700;
+    }
+
+    .status-chip {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12px;
+      background: linear-gradient(90deg, #0052FF 0%, #00D4FF 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 0.01em;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: blink 2.4s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+
+    /* ── Section label ──────────────────────────────────────────── */
+    .section-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-3);
+      margin-bottom: 8px;
+    }
+
+    /* ── Info bar ───────────────────────────────────────────────── */
+    .info-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .info-cell {
+      padding: 10px 16px;
+      border-right: 1px solid var(--border);
+    }
+
+    .info-cell:last-child { border-right: none; }
+
+    .info-key {
+      font-size: 9px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-3);
+      margin-bottom: 3px;
+    }
+
+    .info-val {
+      font-family: var(--mono);
+      font-size: 11.5px;
+      color: var(--text-2);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ── Stats row ──────────────────────────────────────────────── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      position: relative;
+      background: linear-gradient(145deg, #0e1420 0%, #0a1028 100%);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 22px 20px 18px;
+      overflow: hidden;
+      animation: card-enter 0.4s ease-out both;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .stat-card:nth-child(1) { animation-delay: 0.05s; }
+    .stat-card:nth-child(2) { animation-delay: 0.12s; }
+    .stat-card:nth-child(3) { animation-delay: 0.19s; }
+
+    .stat-card.blue-card:hover  { border-color: rgba(0,82,255,0.5);   box-shadow: 0 0 18px rgba(0,82,255,0.12); }
+    .stat-card.green-card:hover { border-color: rgba(29,185,106,0.5); box-shadow: 0 0 18px rgba(29,185,106,0.12); }
+    .stat-card.purp-card:hover  { border-color: rgba(139,92,246,0.5); box-shadow: 0 0 18px rgba(139,92,246,0.12); }
+
+    /* ambient corner glow */
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      top: -30px; right: -30px;
+      width: 100px; height: 100px;
+      border-radius: 50%;
+      opacity: 0.12;
+      pointer-events: none;
+    }
+    .stat-card.blue-card::after  { background: radial-gradient(circle, #0052FF 0%, transparent 70%); }
+    .stat-card.green-card::after { background: radial-gradient(circle, #1DB96A 0%, transparent 70%); }
+    .stat-card.purp-card::after  { background: radial-gradient(circle, #8B5CF6 0%, transparent 70%); }
+
+    @keyframes card-enter {
+      from { opacity: 0; transform: translateY(7px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    .stat-icon {
+      font-size: 16px;
+      margin-bottom: 14px;
+      display: block;
+      opacity: 0.75;
+    }
+
+    .stat-label {
+      font-size: 9px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-3);
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 34px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+
+    .stat-value.accent { color: #4D8AFF; }
+    .stat-value.green  { color: var(--green); }
+    .stat-value.purp   { color: #A78BFA; }
+
+    .stat-sub {
+      font-size: 11px;
+      color: var(--text-3);
+      margin-top: 8px;
+    }
+
+    /* ── How it works ───────────────────────────────────────────── */
+    .how-section {
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 18px 20px 20px;
+      margin-bottom: 24px;
+      background: var(--surface);
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      column-gap: 28px;
+      align-items: start;
+      margin-top: 14px;
+      position: relative;
+      /* --stride = one column-width + one gap, used to place connectors */
+      --stride: calc((100% - 84px) / 4 + 28px);
+    }
+
+    /* lift step content above the connector overlay */
+    .step { position: relative; z-index: 1; }
+
+    .step-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .step-num {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 1px solid var(--border-2);
+      background: var(--surface-2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-2);
+      flex-shrink: 0;
+      font-family: var(--mono);
+    }
+
+    .step-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    .step-desc {
+      font-size: 11px;
+      color: var(--text-2);
+      line-height: 1.55;
+      padding-left: 28px;
+    }
+
+    /* ── Step connectors with flowing particles ─────────────────── */
+    /* Overlay layer: absolutely positioned over .steps, out of grid flow */
+    .connectors-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Each connector runs from the right edge of circle N to the left edge of circle N+1.
+       step-num is 20px wide, sitting at x=0 of its column. With column-gap=28px:
+         --stride = (100% - 3×28px) / 4 + 28px  (one column-width + one gap)
+         right-edge of circle N  = N × --stride + 20px
+         left-edge  of circle N+1 = (N+1) × --stride
+         connector width          = --stride - 20px  (same for all three)            */
+    .step-connector {
+      position: absolute;
+      top: 10px; /* vertical center of the 20px step-num circles */
+      height: 1px;
+      width: calc(var(--stride) - 20px);
+      overflow: visible;
+    }
+
+    .step-connector:nth-child(1) { left: 20px; }
+    .step-connector:nth-child(2) { left: calc(var(--stride) + 20px); }
+    .step-connector:nth-child(3) { left: calc(2 * var(--stride) + 20px); }
+
+    .sc-track {
+      position: absolute;
+      inset: 0;
+      background: #1a2a4a;
+    }
+
+    .sc-dot {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #00D4FF;
+      filter: blur(0.5px);
+      box-shadow: 0 0 6px 2px rgba(0, 212, 255, 0.65),
+                  0 0 14px 4px rgba(0, 212, 255, 0.22);
+      transform: translateY(-50%);
+      animation: sc-flow 2.4s linear infinite;
+      animation-delay: var(--d);
+    }
+
+    @keyframes sc-flow {
+      0%   { left: -4px;              opacity: 0; }
+      6%   {                           opacity: 1; }
+      94%  {                           opacity: 1; }
+      100% { left: calc(100% + 4px);  opacity: 0; }
+    }
+
+    /* ── Transaction table ──────────────────────────────────────── */
+    .tx-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .tx-updated {
+      font-size: 10px;
+      color: var(--text-3);
+      font-family: var(--mono);
+    }
+
+    .tx-panel {
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead th {
+      background: var(--surface);
+      text-align: left;
+      padding: 8px 14px;
+      font-size: 9px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-3);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    tbody td {
+      padding: 10px 14px;
+      font-size: 12px;
+      color: var(--text-2);
+      border-top: 1px solid var(--border);
+      transition: background 0.1s;
+    }
+
+    tbody tr:first-child td { border-top: none; }
+
+    tbody tr:hover td { background: var(--surface); }
+
+    @keyframes row-flash {
+      0%   { background: rgba(0, 82, 255, 0.07); }
+      100% { background: transparent; }
+    }
+
+    tbody tr.new-row td {
+      animation: row-flash 1.6s ease-out forwards;
+    }
+
+    .cell-time {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-3);
+      white-space: nowrap;
+    }
+
+    .cell-id {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-2);
+    }
+
+    .tx-id-link {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(0, 82, 255, 0.30);
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .tx-id-link:hover {
+      color: var(--text);
+      border-bottom-color: var(--text);
+    }
+
+    .cell-addr {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-3);
+    }
+
+    .cell-amount {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--green);
+      white-space: nowrap;
+    }
+
+    .cell-endpoint {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-3);
+    }
+
+    .empty-row td {
+      padding: 36px 14px;
+      text-align: center;
+      color: var(--text-3);
+      font-size: 12px;
+    }
+
+    .empty-row code {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent);
+    }
+
+
+    /* ── Footer ─────────────────────────────────────────────────── */
+    footer {
+      margin-top: 40px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .footer-left {
+      font-size: 10px;
+      color: #1e3a6e;
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .footer-right {
+      font-size: 10px;
+      color: var(--text-3);
+      font-family: var(--mono);
+    }
+
+    /* ── Responsive ─────────────────────────────────────────────── */
+    @media (max-width: 800px) {
+      .stats-row  { grid-template-columns: repeat(2, 1fr); }
+      .info-bar   { grid-template-columns: repeat(2, 1fr); }
+      .info-cell  { border-bottom: 1px solid var(--border); }
+      .info-cell:nth-child(2n) { border-right: none; }
+      .info-cell:nth-last-child(-n+2) { border-bottom: none; }
+      .steps { grid-template-columns: 1fr; gap: 12px; }
+      .connectors-layer { display: none; }
+    }
+
+    @media (max-width: 560px) {
+      .page { padding: 0 16px 48px; }
+      .tagline { display: none; }
+      .header-sep { display: none; }
+      .stats-row { grid-template-columns: 1fr; }
+      table thead { display: none; }
+      tbody td { display: block; border-top: none; padding: 3px 14px; }
+      tbody tr td:first-child { padding-top: 12px; }
+      tbody tr td:last-child  { padding-bottom: 12px; border-top: 1px solid var(--border); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="top-bar"></div>
+
+<div class="page">
+
+  <!-- ── Header ──────────────────────────────────────────────────── -->
+  <header class="header">
+    <div class="header-left">
+      <svg class="logo-mark" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="AgentPay">
+        <rect width="32" height="32" rx="7" fill="#0052FF"/>
+        <circle cx="16" cy="16" r="7" stroke="white" stroke-width="1.5" fill="none" opacity="0.9"/>
+        <line x1="16" y1="19.5" x2="16" y2="12.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        <polyline points="13.2,15 16,12.2 18.8,15" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+      <span class="wordmark">Agent<span>Pay</span></span>
+    </div>
+    <div class="status-chip">
+      <div class="status-dot"></div>
+      <span id="chain-label">Connecting…</span>
+    </div>
+  </header>
+
+  <!-- ── Hero pyramid ────────────────────────────────────────────── -->
+  <div class="hero">
+    <span class="hero-line hero-l1"><span class="grad">AgentPay</span></span>
+    <span class="hero-line hero-l2"><span class="grad">Payment Layer</span> for the <span class="grad">Agentic Economy</span></span>
+    <span class="hero-line hero-l3">Any agent, any API, settled instantly on <span class="grad">Arc</span>.</span>
+    <span class="hero-line hero-l4">Per-request USDC micropayments — no subscriptions, no gas overhead.</span>
+  </div>
+
+  <!-- ── Network info ─────────────────────────────────────────────── -->
+  <div class="info-bar">
+    <div class="info-cell">
+      <div class="info-key">API Wallet</div>
+      <div class="info-val" id="api-wallet">—</div>
+    </div>
+    <div class="info-cell">
+      <div class="info-key">Balance</div>
+      <div class="info-val" id="wallet-balance">—</div>
+    </div>
+    <div class="info-cell">
+      <div class="info-key">Price / Request</div>
+      <div class="info-val" id="price-per-request">—</div>
+    </div>
+    <div class="info-cell">
+      <div class="info-key">Network</div>
+      <div class="info-val" id="blockchain">—</div>
+    </div>
+  </div>
+
+  <!-- ── Stats ────────────────────────────────────────────────────── -->
+  <div class="stats-row">
+    <div class="stat-card blue-card">
+      <span class="stat-icon">📡</span>
+      <div class="stat-label">Total Requests</div>
+      <div class="stat-value accent" id="total-requests">—</div>
+      <div class="stat-sub">API calls served</div>
+    </div>
+    <div class="stat-card green-card">
+      <span class="stat-icon">💵</span>
+      <div class="stat-label">Total Earned</div>
+      <div class="stat-value green" id="total-earned">—</div>
+      <div class="stat-sub">USDC received</div>
+    </div>
+    <div class="stat-card purp-card">
+      <span class="stat-icon">🔄</span>
+      <div class="stat-label">Recent Activity</div>
+      <div class="stat-value purp" id="recent-count">—</div>
+      <div class="stat-sub">Transactions shown</div>
+    </div>
+  </div>
+
+  <!-- ── How it works ─────────────────────────────────────────────── -->
+  <div class="how-section">
+    <div class="section-label">How it works</div>
+    <div class="steps">
+      <!-- connector overlay — position:absolute, excluded from grid flow -->
+      <div class="connectors-layer" aria-hidden="true">
+        <div class="step-connector">
+          <div class="sc-track"></div>
+          <div class="sc-dot" style="--d:0s"></div>
+          <div class="sc-dot" style="--d:0.8s"></div>
+          <div class="sc-dot" style="--d:1.6s"></div>
+        </div>
+        <div class="step-connector">
+          <div class="sc-track"></div>
+          <div class="sc-dot" style="--d:0.27s"></div>
+          <div class="sc-dot" style="--d:1.07s"></div>
+          <div class="sc-dot" style="--d:1.87s"></div>
+        </div>
+        <div class="step-connector">
+          <div class="sc-track"></div>
+          <div class="sc-dot" style="--d:0.53s"></div>
+          <div class="sc-dot" style="--d:1.33s"></div>
+          <div class="sc-dot" style="--d:2.13s"></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-head">
+          <div class="step-num">1</div>
+          <div class="step-title">Agent requests API</div>
+        </div>
+        <div class="step-desc">Autonomous agent initiates an API call to a gated endpoint</div>
+      </div>
+      <div class="step">
+        <div class="step-head">
+          <div class="step-num">2</div>
+          <div class="step-title">AgentPay gates with USDC</div>
+        </div>
+        <div class="step-desc">Middleware requires a Circle USDC transfer before processing</div>
+      </div>
+      <div class="step">
+        <div class="step-head">
+          <div class="step-num">3</div>
+          <div class="step-title">Payment confirmed on Arc</div>
+        </div>
+        <div class="step-desc">Circle verifies the transfer is COMPLETE on Arc L1 — no trust needed</div>
+      </div>
+      <div class="step">
+        <div class="step-head">
+          <div class="step-num">4</div>
+          <div class="step-title">API responds</div>
+        </div>
+        <div class="step-desc">Payment ID clears replay protection, endpoint delivers its response</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Transaction feed ─────────────────────────────────────────── -->
+  <div class="tx-header">
+    <div class="section-label" style="margin-bottom:0">Recent Transactions</div>
+    <div class="tx-updated" id="last-updated">—</div>
+  </div>
+  <div class="tx-panel">
+    <table>
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Payment ID</th>
+          <th>From</th>
+          <th>Amount</th>
+          <th>Endpoint</th>
+        </tr>
+      </thead>
+      <tbody id="tx-body">
+        <tr class="empty-row">
+          <td colspan="5">Waiting for transactions…</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── Footer ───────────────────────────────────────────────────── -->
+  <footer>
+    <div class="footer-left">
+      <span>Built on Arc L1</span>
+      <span>Circle USDC</span>
+      <span>ERC-8183 Agentic Economy Standard</span>
+      <span>Nanopayments Protocol</span>
+    </div>
+    <div class="footer-right" id="footer-time"></div>
+  </footer>
+
+</div>
+
+<script>
+  function shorten(str) {
+    if (!str) return '—'
+    if (str.length <= 16) return str
+    return str.slice(0, 8) + '…' + str.slice(-6)
+  }
+
+  function formatTime(iso) {
+    if (!iso) return '—'
+    return new Date(iso).toLocaleTimeString()
+  }
+
+  function setValueAnimated(el, newText) {
+    if (el.textContent === newText) return
+
+    // Try numeric count-up: match leading number + optional suffix ("USDC", etc.)
+    const nxt = newText.match(/^([\d,]+\.?\d*)\s*(.*)$/)
+    const prv = el.textContent.match(/^([\d,]+\.?\d*)\s*(.*)$/)
+
+    if (nxt && prv) {
+      const from     = parseFloat(prv[1].replace(/,/g, '')) || 0
+      const to       = parseFloat(nxt[1].replace(/,/g, ''))
+      const suffix   = nxt[2] ? ' ' + nxt[2].trim() : ''
+      const decimals = (nxt[1].split('.')[1] || '').length
+      const dur      = 380
+      const t0       = performance.now()
+
+      ;(function tick(now) {
+        const p = Math.min((now - t0) / dur, 1)
+        const ease = 1 - Math.pow(1 - p, 3)           // ease-out cubic
+        const val  = from + (to - from) * ease
+        el.textContent = (decimals > 0 ? val.toFixed(decimals) : Math.round(val).toLocaleString()) + suffix
+        if (p < 1) requestAnimationFrame(tick)
+      })(t0)
+    } else {
+      el.style.opacity = '0.3'
+      setTimeout(() => { el.textContent = newText; el.style.opacity = '1' }, 150)
+    }
+  }
+
+  const seenIds = new Set()
+
+  async function fetchDashboard() {
+    try {
+      const res = await fetch('/api/dashboard')
+      const data = await res.json()
+
+      setValueAnimated(document.getElementById('total-requests'), data.totalRequests.toLocaleString())
+      setValueAnimated(document.getElementById('total-earned'),   `${data.totalEarnedUsdc} USDC`)
+      setValueAnimated(document.getElementById('recent-count'),   String(data.recentTransactions.length))
+
+      document.getElementById('price-per-request').textContent = data.pricePerRequest
+      document.getElementById('api-wallet').textContent        = shorten(data.apiWalletAddress)
+      document.getElementById('wallet-balance').textContent    = data.walletBalance || '—'
+      document.getElementById('blockchain').textContent        = data.blockchain
+      document.getElementById('chain-label').textContent       = data.blockchain
+
+      const tbody = document.getElementById('tx-body')
+
+      if (data.recentTransactions.length === 0) {
+        tbody.innerHTML = `<tr class="empty-row"><td colspan="5">No transactions yet — run <code>npm run agent</code> to start</td></tr>`
+        return
+      }
+
+      tbody.innerHTML = data.recentTransactions.map(tx => {
+        const isNew = !seenIds.has(tx.paymentId)
+        if (isNew) seenIds.add(tx.paymentId)
+        const idCell = tx.txHash
+          ? `<a class="tx-id-link" href="https://testnet.arcscan.app/tx/${tx.txHash}" target="_blank" rel="noopener noreferrer">${shorten(tx.paymentId)}</a>`
+          : `<span class="cell-id">${shorten(tx.paymentId)}</span>`
+        return `
+          <tr class="${isNew ? 'new-row' : ''}">
+            <td class="cell-time">${formatTime(tx.timestamp)}</td>
+            <td>${idCell}</td>
+            <td class="cell-addr">${shorten(tx.fromAddress)}</td>
+            <td class="cell-amount">${tx.amount} USDC</td>
+            <td class="cell-endpoint">${tx.endpoint}</td>
+          </tr>`
+      }).join('')
+
+      const now = new Date().toLocaleTimeString()
+      document.getElementById('last-updated').textContent = `updated ${now}`
+      document.getElementById('footer-time').textContent  = now
+    } catch (err) {
+      document.getElementById('chain-label').textContent  = 'Offline'
+      document.getElementById('last-updated').textContent = 'server unreachable'
+      console.error('Dashboard fetch error:', err)
+    }
+  }
+
+  fetchDashboard()
+  setInterval(fetchDashboard, 3000)
+</script>
+</body>
+</html>

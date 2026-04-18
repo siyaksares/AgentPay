@@ -1,0 +1,32 @@
+TEST_API_KEY:adf7a9d3abe51c1683919d1c59d3eba6:448db5eb2519567f9364beb763a63a37
+# ─── Circle Programmable Wallets ───────────────────────────────────────────────
+# Get your API key at https://console.circle.com
+CIRCLE_API_KEY=TEST_API_KEY:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# 32-byte hex string (run: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")
+CIRCLE_ENTITY_SECRET=your_32_byte_hex_entity_secret_here
+
+# Circle blockchain identifier for the testnet you're using.
+# Use ETH-SEPOLIA for Circle sandbox. When Circle adds Arc Testnet support,
+# change to the appropriate identifier (e.g. ARC-TESTNET).
+CIRCLE_BLOCKCHAIN=ETH-SEPOLIA
+
+# ─── Wallets (populated by `npm run setup`) ───────────────────────────────────
+CIRCLE_WALLET_SET_ID=
+API_WALLET_ID=
+API_WALLET_ADDRESS=
+AGENT_WALLET_ID=
+AGENT_WALLET_ADDRESS=
+
+# ─── Arc Testnet ───────────────────────────────────────────────────────────────
+# Arc Testnet RPC — replace with your preferred RPC endpoint
+ARC_RPC_URL=https://rpc.arcscan.net
+ARC_CHAIN_ID=1116
+
+# USDC contract address on Arc Testnet (configure for your target chain)
+# For Circle sandbox (ETH-SEPOLIA), this is set automatically via Circle's token API
+USDC_CONTRACT_ADDRESS=0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48
+
+# ─── Server ────────────────────────────────────────────────────────────────────
+PORT=3000
+NODE_ENV=development
