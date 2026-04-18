@@ -54,7 +54,8 @@ async function createJob({ providerAddress, description, walletId }) {
   const createResult = await waitForTx(client, createTxId)
   if (createResult.state === 'FAILED' || createResult.state === 'CANCELLED') throw new Error('createJob tx failed')
 
-  // Get jobId from logs (use txHash as proxy jobId if needed)
+  // Log full result to find real jobId
+  console.log('[createJob] full result:', JSON.stringify(createResult, null, 2))
   const jobId = createResult.txHash || require('crypto').randomBytes(32).toString('hex')
 
   // Step 2: setBudget
