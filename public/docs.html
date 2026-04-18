@@ -181,13 +181,13 @@
     <section id="auth">
       <h2>Authentication</h2>
       <p>All gated endpoints require a valid Circle transfer ID as HTTP header:</p>
-      <pre>X-Payment-Id: a1b2c3d4-e5f6-7890-abcd-ef1234567890</pre>
+      <pre>X-Job-Id: a1b2c3d4-e5f6-7890-abcd-ef1234567890</pre>
       <p>Each job ID can only be used <strong>once</strong>. Reuse returns <code>402 Job Already Settled</code>.</p>
     </section>
     <section id="errors">
       <h2>Error Codes</h2>
       <div class="eb"><div class="ed">
-        <code>402 Payment Required</code> — No X-Payment-Id header.<br><br>
+        <code>402 Payment Required</code> — No X-Job-Id header.<br><br>
         <code>402 Payment Already Used</code> — Transfer ID already spent.<br><br>
         <code>402 Invalid Payment</code> — Transfer not COMPLETE or wrong amount.<br><br>
         <code>404 Not Found</code> — Resource not found.<br><br>
