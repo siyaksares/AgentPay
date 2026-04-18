@@ -115,7 +115,7 @@
     <section id="intro">
       <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
         <span class="badge bg">● Live on ARC Testnet</span>
-        <span class="badge bb">v1.0.0</span>
+        <span class="badge bb">v1.1.0</span>
         <span class="badge bgr">Open Source</span>
       </div>
       <h1>AgentPay Documentation</h1>
@@ -173,14 +173,14 @@
     <section id="endpoints">
         <h2>API Endpoints</h2>
         <p>Base URL: <code>https://agentpay-production-7a2a.up.railway.app</code></p>
-            <div class="eb"><div class="eh"><span class="method mp">POST</span><span class="ep">/api/job/create</span></div><div class="ed">Posts a new ERC-8183 job on-chain. Escrows USDC and returns a <code>jobId</code>.</div></div>
-            <div class="eb"><div class="eh"><span class="method mg">GET</span><span class="ep">/api/job/status/:jobId</span></div><div class="ed">Polls job lifecycle state. Returns <code>FUNDED</code> → <code>COMPLETED</code>.</div></div>
-            <div class="eb"><div class="eh"><span class="method mg">GET</span><span class="ep">/api/onchain/analytics?address=0x...</span></div><div class="ed">Live Arc Testnet analytics: balance, tx count, block explorer link. Requires <code>X-Job-Id</code>.</div></div>
-            <div class="eb"><div class="eh"><span class="method mg">GET</span><span class="ep">/api/defi/signals?coin=bitcoin</span></div><div class="ed">DeFi trading signals: price, 24h/7d momentum, BUY/SELL/NEUTRAL with confidence score. Requires <code>X-Job-Id</code>.</div></div>
-            <div class="eb"><div class="eh"><span class="method mp">POST</span><span class="ep">/api/ai/summarize</span></div><div class="ed">AI text summarizer: summary, sentiment, key phrases. Body: <code>{"text": "..."}</code>. Requires <code>X-Job-Id</code>.</div></div>
-            <div class="eb"><div class="eh"><span class="method mg">GET</span><span class="ep">/api/data/macro</span></div><div class="ed">Macro market data: BTC, ETH, USDC prices + RISK_ON/RISK_OFF sentiment. Requires <code>X-Job-Id</code>.</div></div>
-            <div class="eb"><div class="eh"><span class="method mg">GET</span><span class="ep">/api/data/usdc</span></div><div class="ed">USDC peg analytics: price, market cap, deviation, stability status on Arc. Requires <code>X-Job-Id</code>.</div></div>
-            <div class="eb"><div class="eh"><span class="method mg">GET</span><span class="ep">/api/weather?city=london</span></div><div class="ed">Weather data feed. Cities: new-york, london, tokyo, sydney. Requires <code>X-Job-Id</code>.</div></div>
+            <div class="eb"><div class="eh"><span class="method mp">POST</span><span class="ep">/api/job/create</span></div><div class="ed">Create ERC-8183 job on Arc Testnet. Escrows USDC, returns <code>jobId</code>. Use as <code>X-Job-Id</code> header.</div></div>
+            <div class="eb"><div class="eh"><span class="method mg">GET</span><span class="ep">/api/job/status/:jobId</span></div><div class="ed">Poll job lifecycle state: <code>FUNDED</code> → <code>COMPLETED</code>.</div></div>
+            <div class="eb"><div class="eh"><span class="method mg">GET</span><span class="ep">/api/onchain/analytics</span></div><div class="ed">Arc Testnet wallet analytics: balance, tx count, block explorer. Requires <code>X-Job-Id</code>.</div></div>
+            <div class="eb"><div class="eh"><span class="method mg">GET</span><span class="ep">/api/defi/signals?coin=bitcoin</span></div><div class="ed">DeFi trading signals: price, momentum, BUY/SELL/NEUTRAL + confidence. Requires <code>X-Job-Id</code>.</div></div>
+            <div class="eb"><div class="eh"><span class="method mp">POST</span><span class="ep">/api/ai/summarize</span></div><div class="ed">AI text summarizer: summary, sentiment, key phrases. Body: <code>{"text":"..."}</code>. Requires <code>X-Job-Id</code>.</div></div>
+            <div class="eb"><div class="eh"><span class="method mg">GET</span><span class="ep">/api/data/macro</span></div><div class="ed">Macro market data: BTC, ETH, USDC prices + RISK_ON/RISK_OFF. Requires <code>X-Job-Id</code>.</div></div>
+            <div class="eb"><div class="eh"><span class="method mg">GET</span><span class="ep">/api/data/usdc</span></div><div class="ed">USDC peg analytics: price, market cap, deviation, stability on Arc. Requires <code>X-Job-Id</code>.</div></div>
+            <div class="eb"><div class="eh"><span class="method mg">GET</span><span class="ep">/api/weather?city=london</span></div><div class="ed">Weather data. Cities: new-york, london, tokyo, sydney. Requires <code>X-Job-Id</code>.</div></div>
             <div class="eb"><div class="eh"><span class="method mg">GET</span><span class="ep">/api/crypto?coin=bitcoin</span></div><div class="ed">Crypto price via CoinGecko. Requires <code>X-Job-Id</code>.</div></div>
         </section>
     <section id="auth">
