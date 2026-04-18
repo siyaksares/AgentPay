@@ -118,7 +118,7 @@
         <span class="badge bgr">Open Source</span>
       </div>
       <h1>AgentPay Documentation</h1>
-      <p class="lead">AgentPay is a per-request USDC micropayment infrastructure for AI agents. Instead of subscriptions or API keys, every API call is settled instantly on the ARC blockchain — no trust needed, no overhead.</p>
+      <p class="lead">AgentPay is the first ERC-8183 powered API marketplace for AI agents. Every API call is a structured on-chain job — work defined, USDC escrowed, deliverable verified, payment released trustlessly on Arc.</p>
       <div class="card-grid">
         <div class="card"><div class="ci">⚡</div><h3>Per-Request Billing</h3><p>Each API call costs 0.000001 USDC. Pay exactly for what you use.</p></div>
         <div class="card"><div class="ci">🔒</div><h3>Replay Protection</h3><p>Every payment ID is single-use. No double-spending, no replay attacks.</p></div>
@@ -137,7 +137,7 @@
         <li><strong>Traditional crypto</strong> — high gas fees make micropayments impractical</li>
       </ul>
       <h3>The Solution</h3>
-      <p>AgentPay introduces a payment middleware layer. Before any API response is served, a valid USDC transfer on ARC must be verified. Zero trust. Zero subscriptions.</p>
+      <p>AgentPay implements ERC-8183: a standard for on-chain AI agent jobs. Every API call is a structured job — posted on-chain, accepted by a provider, executed, verified, and paid trustlessly via USDC escrow on ARC. Zero subscriptions. Zero trust required.</p>
     </section>
     <section id="sectors">
       <h2>Target Sectors</h2>
@@ -151,7 +151,7 @@
       </div>
     </section>
     <section id="flow">
-      <h2>Payment Flow</h2>
+      <h2>ERC-8183 Job Lifecycle</h2>
       <div class="fs">
         <div class="fs-item"><div class="sn">1</div><div class="sb"><h3>Initiate Transfer</h3><p>Agent calls <code>POST /api/pay/transfer</code>. Server creates a Circle USDC transfer on ARC Testnet.</p></div></div>
         <div class="fs-item"><div class="sn">2</div><div class="sb"><h3>Poll for Confirmation</h3><p>Agent polls <code>GET /api/pay/status/:id</code> until state reaches <code>COMPLETE</code>. Takes 3–8 seconds.</p></div></div>
@@ -182,7 +182,7 @@
       <h2>Authentication</h2>
       <p>All gated endpoints require a valid Circle transfer ID as HTTP header:</p>
       <pre>X-Payment-Id: a1b2c3d4-e5f6-7890-abcd-ef1234567890</pre>
-      <p>Each transfer ID can only be used <strong>once</strong>. Reuse returns <code>402 Payment Already Used</code>.</p>
+      <p>Each job ID can only be used <strong>once</strong>. Reuse returns <code>402 Job Already Settled</code>.</p>
     </section>
     <section id="errors">
       <h2>Error Codes</h2>
