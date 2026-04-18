@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgentPay — Documentation</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:#080B12;--surface:#0D1119;--surface-2:#111826;--border:#1C2438;
+      --accent:#0052FF;--green:#1DB96A;--text:#E8EDF4;--text-2:#6B7A99;--text-3:#36435C;
+      --mono:'SF Mono','Fira Code',monospace;
+      --sans:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
+    }
+    html{font-size:14px}
+    body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+    .top-bar{height:2px;background:var(--accent)}
+    header{display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:56px;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:100}
+    .hl{display:flex;align-items:center;gap:10px;text-decoration:none}
+    .wm{font-size:15px;font-weight:600;color:var(--text)}.wm span{color:var(--accent)}
+    .hr{display:flex;gap:12px;align-items:center}
+    .btn-o{color:var(--text-2);font-size:13px;text-decoration:none;padding:5px 12px;border:1px solid var(--border);border-radius:6px}
+    .btn-o:hover{border-color:var(--accent);color:var(--accent)}
+    .btn-p{background:var(--accent);color:#fff;font-size:13px;text-decoration:none;padding:5px 14px;border-radius:6px;font-weight:500}
+    .layout{display:flex;min-height:calc(100vh - 58px)}
+    .sidebar{width:240px;flex-shrink:0;border-right:1px solid var(--border);padding:32px 0;position:sticky;top:58px;height:calc(100vh - 58px);overflow-y:auto}
+    .sl{font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--text-3);text-transform:uppercase;padding:0 24px;margin-bottom:6px}
+    .sidebar a{display:block;padding:6px 24px;font-size:13px;color:var(--text-2);text-decoration:none;border-left:2px solid transparent;transition:all .15s}
+    .sidebar a:hover{color:var(--text);background:var(--surface)}
+    .sidebar a.active{color:var(--accent);border-left-color:var(--accent);background:rgba(0,82,255,.06)}
+    .content{flex:1;max-width:780px;padding:56px 64px}
+    h1{font-size:32px;font-weight:700;margin-bottom:12px}
+    h2{font-size:20px;font-weight:600;margin:48px 0 16px;padding-top:48px;border-top:1px solid var(--border)}
+    h3{font-size:15px;font-weight:600;margin:28px 0 10px}
+    p{font-size:14px;line-height:1.75;color:var(--text-2);margin-bottom:14px}
+    ul{padding-left:20px;margin-bottom:14px}
+    li{font-size:14px;line-height:1.75;color:var(--text-2);margin-bottom:4px}
+    li strong{color:var(--text)}
+    .lead{font-size:16px;color:var(--text-2);line-height:1.7;margin-bottom:32px}
+    .badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;margin-right:6px;margin-bottom:4px}
+    .bb{background:rgba(0,82,255,.15);color:#4d8dff}
+    .bg{background:rgba(29,185,106,.12);color:var(--green)}
+    .bgr{background:var(--surface-2);color:var(--text-2);border:1px solid var(--border)}
+    .card-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0 28px}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px}
+    .ci{font-size:22px;margin-bottom:10px}
+    .card h3{margin:0 0 6px;font-size:14px}
+    .card p{margin:0;font-size:13px}
+    .eb{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:16px 0 28px}
+    .eh{display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid var(--border)}
+    .method{font-family:var(--mono);font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px}
+    .mg{background:rgba(29,185,106,.12);color:var(--green)}
+    .mp{background:rgba(0,82,255,.12);color:#4d8dff}
+    .ep{font-family:var(--mono);font-size:13px;color:var(--text)}
+    .ed{padding:14px 18px;font-size:13px;color:var(--text-2);line-height:1.6}
+    .ed code{font-family:var(--mono);font-size:12px;background:var(--surface-2);padding:1px 6px;border-radius:3px;color:var(--text)}
+    pre{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:18px 20px;overflow-x:auto;font-family:var(--mono);font-size:12px;line-height:1.7;color:var(--text-2);margin:12px 0 20px}
+    .tg{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0 28px}
+    .ti{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:4px}
+    .tn{font-size:13px;font-weight:600;color:var(--text)}
+    .td{font-size:12px;color:var(--text-2)}
+    .fs{display:flex;flex-direction:column;gap:0;margin:16px 0 28px}
+    .fs-item{display:flex;gap:16px;align-items:flex-start;padding:16px 0;border-bottom:1px solid var(--border)}
+    .fs-item:last-child{border-bottom:none}
+    .sn{width:28px;height:28px;border-radius:50%;background:rgba(0,82,255,.12);color:var(--accent);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .sb h3{margin:0 0 4px;font-size:14px}
+    .sb p{margin:0;font-size:13px}
+    .sg{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0 28px}
+    .si{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px}
+    .sic{font-size:20px;flex-shrink:0}
+    .sin{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px}
+    .sid{font-size:12px;color:var(--text-2);line-height:1.5}
+    @media(max-width:900px){.sidebar{display:none}.content{padding:32px 24px}.card-grid,.tg,.sg{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="top-bar"></div>
+<header>
+  <a class="hl" href="/">
+    <svg width="28" height="28" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="7" fill="#0052FF"/><circle cx="16" cy="16" r="7" stroke="white" stroke-width="1.5" fill="none" opacity=".9"/><line x1="16" y1="19.5" x2="16" y2="12.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/><polyline points="13.2,15 16,12.2 18.8,15" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+    <span class="wm">Agent<span>Pay</span></span>
+  </a>
+  <div class="hr">
+    <a href="/" class="btn-o">← Dashboard</a>
+    <a href="https://github.com/siyaksares/AgentPay" target="_blank" class="btn-p">GitHub</a>
+  </div>
+</header>
+<div class="layout">
+  <nav class="sidebar">
+    <div style="margin-bottom:28px">
+      <div class="sl">Overview</div>
+      <a href="#intro" class="active">Introduction</a>
+      <a href="#problem">Problem & Solution</a>
+      <a href="#sectors">Target Sectors</a>
+    </div>
+    <div style="margin-bottom:28px">
+      <div class="sl">How It Works</div>
+      <a href="#flow">Payment Flow</a>
+      <a href="#tech">Tech Stack</a>
+    </div>
+    <div style="margin-bottom:28px">
+      <div class="sl">API Reference</div>
+      <a href="#endpoints">Endpoints</a>
+      <a href="#auth">Authentication</a>
+      <a href="#errors">Error Codes</a>
+    </div>
+    <div>
+      <div class="sl">Resources</div>
+      <a href="#quickstart">Quick Start</a>
+      <a href="https://github.com/siyaksares/AgentPay" target="_blank">GitHub ↗</a>
+    </div>
+  </nav>
+  <main class="content">
+    <section id="intro">
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+        <span class="badge bg">● Live on ARC Testnet</span>
+        <span class="badge bb">v1.0.0</span>
+        <span class="badge bgr">Open Source</span>
+      </div>
+      <h1>AgentPay Documentation</h1>
+      <p class="lead">AgentPay is a per-request USDC micropayment infrastructure for AI agents. Instead of subscriptions or API keys, every API call is settled instantly on the ARC blockchain — no trust needed, no overhead.</p>
+      <div class="card-grid">
+        <div class="card"><div class="ci">⚡</div><h3>Per-Request Billing</h3><p>Each API call costs 0.000001 USDC. Pay exactly for what you use.</p></div>
+        <div class="card"><div class="ci">🔒</div><h3>Replay Protection</h3><p>Every payment ID is single-use. No double-spending, no replay attacks.</p></div>
+        <div class="card"><div class="ci">🤖</div><h3>Agent-Native</h3><p>Designed for autonomous AI agents that transact without human approval.</p></div>
+        <div class="card"><div class="ci">🌐</div><h3>On-Chain Settlement</h3><p>Payments verified on ARC L1 via Circle's Programmable Wallets API.</p></div>
+      </div>
+    </section>
+    <section id="problem">
+      <h2>Problem & Solution</h2>
+      <h3>The Problem</h3>
+      <p>Today's API economy is built for humans. Subscriptions, OAuth flows, and credit card billing assume a person is on the other end. As AI agents become autonomous economic actors, they need a payment primitive that works without human intervention.</p>
+      <ul>
+        <li><strong>Subscription models</strong> — waste money when agents run infrequently</li>
+        <li><strong>API keys</strong> — no payment enforcement, easy to abuse</li>
+        <li><strong>Credit cards</strong> — require human authorization flows</li>
+        <li><strong>Traditional crypto</strong> — high gas fees make micropayments impractical</li>
+      </ul>
+      <h3>The Solution</h3>
+      <p>AgentPay introduces a payment middleware layer. Before any API response is served, a valid USDC transfer on ARC must be verified. Zero trust. Zero subscriptions.</p>
+    </section>
+    <section id="sectors">
+      <h2>Target Sectors</h2>
+      <div class="sg">
+        <div class="si"><div class="sic">📈</div><div><div class="sin">DeFi & Trading</div><div class="sid">Agents paying for real-time price feeds and on-chain analytics per query.</div></div></div>
+        <div class="si"><div class="sic">🌤️</div><div><div class="sin">Data Marketplaces</div><div class="sid">Weather, geospatial, economic data sold per-request without API key management.</div></div></div>
+        <div class="si"><div class="sic">🏥</div><div><div class="sin">Healthcare & Research</div><div class="sid">Agents accessing medical databases and diagnostic APIs on demand.</div></div></div>
+        <div class="si"><div class="sic">⚖️</div><div><div class="sin">Legal & Compliance</div><div class="sid">Automated compliance checks and regulatory data access.</div></div></div>
+        <div class="si"><div class="sic">🎮</div><div><div class="sin">Gaming & Metaverse</div><div class="sid">In-game AI agents purchasing items and calling NPC services.</div></div></div>
+        <div class="si"><div class="sic">🏗️</div><div><div class="sin">Infrastructure</div><div class="sid">AI DevOps agents paying for compute and monitoring APIs.</div></div></div>
+      </div>
+    </section>
+    <section id="flow">
+      <h2>Payment Flow</h2>
+      <div class="fs">
+        <div class="fs-item"><div class="sn">1</div><div class="sb"><h3>Initiate Transfer</h3><p>Agent calls <code>POST /api/pay/transfer</code>. Server creates a Circle USDC transfer on ARC Testnet.</p></div></div>
+        <div class="fs-item"><div class="sn">2</div><div class="sb"><h3>Poll for Confirmation</h3><p>Agent polls <code>GET /api/pay/status/:id</code> until state reaches <code>COMPLETE</code>. Takes 3–8 seconds.</p></div></div>
+        <div class="fs-item"><div class="sn">3</div><div class="sb"><h3>Present Proof & Receive Data</h3><p>Agent calls gated endpoint with <code>X-Payment-Id</code> header. Middleware verifies and responds.</p></div></div>
+      </div>
+    </section>
+    <section id="tech">
+      <h2>Tech Stack</h2>
+      <div class="tg">
+        <div class="ti"><div class="tn">Node.js + Express</div><div class="td">Lightweight API server with middleware architecture</div></div>
+        <div class="ti"><div class="tn">ARC Testnet</div><div class="td">L1 blockchain for fast, low-cost USDC settlement</div></div>
+        <div class="ti"><div class="tn">Circle Wallets API</div><div class="td">Programmable wallets for agent-controlled USDC transfers</div></div>
+        <div class="ti"><div class="tn">CoinGecko API</div><div class="td">Free real-time crypto price and exchange rate data</div></div>
+        <div class="ti"><div class="tn">Railway</div><div class="td">Zero-config cloud deployment with GitHub auto-deploy</div></div>
+        <div class="ti"><div class="tn">USDC (ERC-20)</div><div class="td">Stable, programmable payment token</div></div>
+      </div>
+    </section>
+    <section id="endpoints">
+      <h2>API Endpoints</h2>
+      <p>Base URL: <code>https://agentpay-production-7a2a.up.railway.app</code></p>
+      <div class="eb"><div class="eh"><span class="method mp">POST</span><span class="ep">/api/pay/transfer</span></div><div class="ed">Initiates a USDC transfer. Returns a <code>transferId</code> to use as proof of payment.</div></div>
+      <div class="eb"><div class="eh"><span class="method mg">GET</span><span class="ep">/api/pay/status/:transferId</span></div><div class="ed">Polls transfer status. Wait for <code>state: "COMPLETE"</code>.</div></div>
+      <div class="eb"><div class="eh"><span class="method mg">GET</span><span class="ep">/api/weather?city=london</span></div><div class="ed">Current weather. Requires <code>X-Payment-Id</code>. Cities: new-york, london, tokyo, sydney.</div></div>
+      <div class="eb"><div class="eh"><span class="method mg">GET</span><span class="ep">/api/crypto?coin=bitcoin</span></div><div class="ed">Crypto price via CoinGecko. Requires <code>X-Payment-Id</code>.</div></div>
+      <div class="eb"><div class="eh"><span class="method mg">GET</span><span class="ep">/api/exchange?from=usd-coin&amp;to=usd</span></div><div class="ed">Exchange rate between two assets. Requires <code>X-Payment-Id</code>.</div></div>
+    </section>
+    <section id="auth">
+      <h2>Authentication</h2>
+      <p>All gated endpoints require a valid Circle transfer ID as HTTP header:</p>
+      <pre>X-Payment-Id: a1b2c3d4-e5f6-7890-abcd-ef1234567890</pre>
+      <p>Each transfer ID can only be used <strong>once</strong>. Reuse returns <code>402 Payment Already Used</code>.</p>
+    </section>
+    <section id="errors">
+      <h2>Error Codes</h2>
+      <div class="eb"><div class="ed">
+        <code>402 Payment Required</code> — No X-Payment-Id header.<br><br>
+        <code>402 Payment Already Used</code> — Transfer ID already spent.<br><br>
+        <code>402 Invalid Payment</code> — Transfer not COMPLETE or wrong amount.<br><br>
+        <code>404 Not Found</code> — Resource not found.<br><br>
+        <code>500 Internal Server Error</code> — Unexpected error.
+      </div></div>
+    </section>
+    <section id="quickstart">
+      <h2>Quick Start</h2>
+      <pre>git clone https://github.com/siyaksares/AgentPay
+cd AgentPay && npm install && cp .env.example .env
+npm start</pre>
+    </section>
+    <div style="margin-top:64px;padding-top:32px;border-top:1px solid var(--border);color:var(--text-3);font-size:12px;display:flex;justify-content:space-between">
+      <span>AgentPay — Built for the Q1 2026 ARC Hackathon</span>
+      <a href="https://github.com/siyaksares/AgentPay" target="_blank" style="color:var(--text-3);text-decoration:none">GitHub ↗</a>
+    </div>
+  </main>
+</div>
+<script>
+const sections=document.querySelectorAll('section[id]')
+const links=document.querySelectorAll('.sidebar a[href^="#"]')
+window.addEventListener('scroll',()=>{
+  let c=''
+  sections.forEach(s=>{if(window.scrollY>=s.offsetTop-80)c=s.id})
+  links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+c))
+})
+</script>
+</body>
+</html>
