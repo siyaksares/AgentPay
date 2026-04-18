@@ -15,12 +15,22 @@ function getClient() {
 async function waitForTx(client, txId, maxAttempts = 20) {
   const terminal = new Set(['COMPLETE', 'FAILED', 'CANCELLED'])
   for (let i = 0; i < maxAttempts; i++) {
-    const res = await client.getTransaction({ id: txId })
-    const tx = res.data?.transaction
-    if (tx && terminal.has(tx.state)) {
-      // Normalize txHash — Circle may use transactionHash or txHash
-      tx.txHash = tx.txHash || tx.transactionHash || tx.blockHash || null
-      return tx
+    try {
+      // Try contractExecution transaction first
+      const res = await client.getContractExecutionTransaction({ id: txId })
+      const tx = res.data?.transaction
+      if (tx && terminal.has(tx.state)) {
+        tx.txHash = tx.txHash || tx.transactionHash || null
+        return tx
+      }
+    } catch(e) {
+      // Fallback to regular transaction
+      const res = await client.getTransaction({ id: txId })
+      const tx = res.data?.transaction
+      if (tx && terminal.has(tx.state)) {
+        tx.txHash = tx.txHash || tx.transactionHash || null
+        return tx
+      }
     }
     await new Promise(r => setTimeout(r, 2000))
   }
