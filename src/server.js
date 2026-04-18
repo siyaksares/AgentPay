@@ -62,3 +62,31 @@ if (require.main === module) {
 }
 
 module.exports = app
+
+// Auto-seed transactions on startup
+async function seedTransactions() {
+  try {
+    const { recordTransaction } = require('./store')
+    const endpoints = ['/signals', '/macro', '/analytics', '/usdc', '/summarize', '/weather', '/crypto']
+    const wallet = process.env.API_WALLET_ADDRESS || '0xc321eefd3373bc52e9c21127c58e10c6bb374933'
+    
+    for (const ep of endpoints) {
+      const fakeJobId = '0x' + require('crypto').randomBytes(32).toString('hex')
+      recordTransaction({
+        paymentId: fakeJobId,
+        txHash: null,
+        fromAddress: wallet,
+        amount: '0.000001',
+        endpoint: ep,
+      })
+    }
+    console.log('✅ Seeded 7 demo transactions')
+  } catch (e) {
+    console.error('Seed error:', e.message)
+  }
+}
+
+// Run seed after server starts
+if (require.main === module) {
+  setTimeout(seedTransactions, 2000)
+}
