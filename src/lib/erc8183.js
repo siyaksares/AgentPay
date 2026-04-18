@@ -17,7 +17,11 @@ async function waitForTx(client, txId, maxAttempts = 20) {
   for (let i = 0; i < maxAttempts; i++) {
     const res = await client.getTransaction({ id: txId })
     const tx = res.data?.transaction
-    if (tx && terminal.has(tx.state)) return tx
+    if (tx && terminal.has(tx.state)) {
+      // Normalize txHash — Circle may use transactionHash or txHash
+      tx.txHash = tx.txHash || tx.transactionHash || tx.blockHash || null
+      return tx
+    }
     await new Promise(r => setTimeout(r, 2000))
   }
   throw new Error('Transaction timeout')
