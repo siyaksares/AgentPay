@@ -7,37 +7,36 @@ const requirePayment = require('../middleware/requirePayment')
 router.get('/analytics', requirePayment, async (req, res) => {
   try {
     const address = req.query.address || process.env.API_WALLET_ADDRESS
-    
-    // Fetch from Arc Testnet RPC
-    const rpcUrl = process.env.ARC_RPC_URL || 'https://rpc.arcscan.net'
-    
-    const [balanceRes, txCountRes] = await Promise.all([
-      fetch(rpcUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ jsonrpc: '2.0', method: 'eth_getBalance', params: [address, 'latest'], id: 1 }),
-      }),
-      fetch(rpcUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ jsonrpc: '2.0', method: 'eth_getTransactionCount', params: [address, 'latest'], id: 2 }),
-      }),
-    ])
 
-    const balanceData = await balanceRes.json()
-    const txCountData = await txCountRes.json()
+    // Use Circle Wallets API for balance (more reliable than RPC on testnet)
+    const { initiateDeveloperControlledWalletsClient } = require('@circle-fin/developer-controlled-wallets')
+    const client = initiateDeveloperControlledWalletsClient({
+      apiKey: process.env.CIRCLE_API_KEY,
+      entitySecret: process.env.CIRCLE_ENTITY_SECRET,
+    })
 
-    const balanceWei = parseInt(balanceData.result || '0', 16)
-    const txCount = parseInt(txCountData.result || '0', 16)
+    let balanceArc = '0'
+    let balanceUsdc = '0'
+    let txCount = 0
+
+    try {
+      const walletRes = await client.getWallet({ id: process.env.API_WALLET_ID })
+      const wallet = walletRes.data?.wallet
+      balanceArc = wallet?.balances?.find(b => b.token?.symbol === 'ARC')?.amount || '0'
+      balanceUsdc = wallet?.balances?.find(b => b.token?.symbol === 'USDC')?.amount || '0'
+    } catch (e) {
+      // fallback
+    }
 
     res.json({
       success: true,
       data: {
         address,
-        balance: { wei: balanceWei, arc: (balanceWei / 1e18).toFixed(6) },
+        balance: { arc: balanceArc, usdc: balanceUsdc },
         transactionCount: txCount,
         network: 'ARC-TESTNET',
         blockExplorer: `https://testnet.arcscan.app/address/${address}`,
+        contract: '0x0747EEf0706327138c69792bF28Cd525089e4583',
         timestamp: new Date().toISOString(),
       },
       job: { id: req.job.jobId, txHash: req.job.txHash, arcScanUrl: req.job.arcScanUrl },
