@@ -17,7 +17,7 @@ module.exports = {
   },
   arc: {
     rpcUrl: process.env.ARC_RPC_URL || 'https://rpc.arcscan.net',
-    chainId: parseInt(process.env.ARC_CHAIN_ID || '1116'),
+    chainId: parseInt(process.env.ARC_CHAIN_ID || '5042002'),
     usdcAddress: process.env.USDC_CONTRACT_ADDRESS || '0x3600000000000000000000000000000000000000',
   },
   payment: {
