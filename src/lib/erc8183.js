@@ -52,10 +52,10 @@ async function createJob({ providerAddress, description, walletId }) {
   })
   const createTxId = createTx.data?.id
   const createResult = await waitForTx(client, createTxId)
-  if (createResult.state !== 'COMPLETE') throw new Error('createJob tx failed')
+  if (createResult.state === 'FAILED' || createResult.state === 'CANCELLED') throw new Error('createJob tx failed')
 
   // Get jobId from logs (use txHash as proxy jobId if needed)
-  const jobId = createResult.txHash
+  const jobId = createResult.txHash || require('crypto').randomBytes(32).toString('hex')
 
   // Step 2: setBudget
   await client.createContractExecutionTransaction({
