@@ -89,7 +89,7 @@ async function createJob({ providerAddress, description, walletId }) {
     txHash: fundResult.txHash,
     state: 'FUNDED',
     contractAddress: ERC8183_CONTRACT,
-    arcScanUrl: `https://testnet.arcscan.app/tx/${fundResult.txHash}`,
+    arcScanUrl: fundResult.txHash ? `https://testnet.arcscan.app/tx/${fundResult.txHash}` : `https://testnet.arcscan.app/address/${process.env.API_WALLET_ADDRESS}`,
   }
 }
 
