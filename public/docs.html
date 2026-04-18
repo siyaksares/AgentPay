@@ -172,11 +172,11 @@
     <section id="endpoints">
       <h2>API Endpoints</h2>
       <p>Base URL: <code>https://agentpay-production-7a2a.up.railway.app</code></p>
-      <div class="eb"><div class="eh"><span class="method mp">POST</span><span class="ep">/api/pay/transfer</span></div><div class="ed">Initiates a USDC transfer. Returns a <code>transferId</code> to use as proof of payment.</div></div>
-      <div class="eb"><div class="eh"><span class="method mg">GET</span><span class="ep">/api/pay/status/:transferId</span></div><div class="ed">Polls transfer status. Wait for <code>state: "COMPLETE"</code>.</div></div>
-      <div class="eb"><div class="eh"><span class="method mg">GET</span><span class="ep">/api/weather?city=london</span></div><div class="ed">Current weather. Requires <code>X-Payment-Id</code>. Cities: new-york, london, tokyo, sydney.</div></div>
-      <div class="eb"><div class="eh"><span class="method mg">GET</span><span class="ep">/api/crypto?coin=bitcoin</span></div><div class="ed">Crypto price via CoinGecko. Requires <code>X-Payment-Id</code>.</div></div>
-      <div class="eb"><div class="eh"><span class="method mg">GET</span><span class="ep">/api/exchange?from=usd-coin&amp;to=usd</span></div><div class="ed">Exchange rate between two assets. Requires <code>X-Payment-Id</code>.</div></div>
+      <div class="eb"><div class="eh"><span class="method mp">POST</span><span class="ep">/api/job/create</span></div><div class="ed">Posts a new ERC-8183 job on-chain. Escrows USDC and returns a <code>jobId</code>.</div></div>
+      <div class="eb"><div class="eh"><span class="method mg">GET</span><span class="ep">/api/job/status/:jobId</span></div><div class="ed">Polls job lifecycle state. Wait for <code>state: "ACCEPTED"</code> then <code>"COMPLETED"</code>.</div></div>
+      <div class="eb"><div class="eh"><span class="method mg">GET</span><span class="ep">/api/weather?city=london</span></div><div class="ed">Current weather. Requires <code>X-Job-Id</code>. Cities: new-york, london, tokyo, sydney.</div></div>
+      <div class="eb"><div class="eh"><span class="method mg">GET</span><span class="ep">/api/crypto?coin=bitcoin</span></div><div class="ed">Crypto price via CoinGecko. Requires <code>X-Job-Id</code>.</div></div>
+      <div class="eb"><div class="eh"><span class="method mg">GET</span><span class="ep">/api/exchange?from=usd-coin&amp;to=usd</span></div><div class="ed">Exchange rate between two assets. Requires <code>X-Job-Id</code>.</div></div>
     </section>
     <section id="auth">
       <h2>Authentication</h2>
