@@ -12,6 +12,37 @@ function getClient() {
   })
 }
 
+
+async function getJobIdFromReceipt(txHash) {
+  const https = require('https')
+  return new Promise((resolve, reject) => {
+    const body = JSON.stringify({
+      jsonrpc: '2.0', method: 'eth_getTransactionReceipt',
+      params: [txHash], id: 1
+    })
+    const req = https.request({
+      hostname: 'rpc.testnet.arc.network', path: '/', method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Content-Length': body.length }
+    }, res => {
+      let data = ''
+      res.on('data', d => data += d)
+      res.on('end', () => {
+        try {
+          const r = JSON.parse(data)
+          const log = r.result && r.result.logs && r.result.logs[0]
+          if (!log) return reject(new Error('No logs in receipt'))
+          const jobId = BigInt(log.data).toString()
+          console.log('[getJobIdFromReceipt] jobId:', jobId)
+          resolve(jobId)
+        } catch(e) { reject(e) }
+      })
+    })
+    req.on('error', reject)
+    req.write(body)
+    req.end()
+  })
+}
+
 async function waitForTx(client, txId, maxAttempts = 20) {
   const terminal = new Set(['COMPLETE', 'FAILED', 'CANCELLED', 'CLEARED'])
   for (let i = 0; i < maxAttempts; i++) {
@@ -54,9 +85,7 @@ async function createJob({ providerAddress, description, walletId }) {
   const createResult = await waitForTx(client, createTxId)
   if (createResult.state === 'FAILED' || createResult.state === 'CANCELLED') throw new Error('createJob tx failed')
 
-  // Log full result to find real jobId
-  console.log('[createJob] full result:', JSON.stringify(createResult, null, 2))
-  const jobId = createResult.txHash || require('crypto').randomBytes(32).toString('hex')
+  const jobId = await getJobIdFromReceipt(createResult.txHash)
 
   // Step 2: setBudget
   await client.createContractExecutionTransaction({
