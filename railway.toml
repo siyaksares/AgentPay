@@ -1,0 +1,5 @@
+[services.server]
+startCommand = "npm start"
+
+[services.agent]
+startCommand = "node agent/index.js"
