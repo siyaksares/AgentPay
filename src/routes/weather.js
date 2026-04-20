@@ -1,5 +1,10 @@
 const express = require('express')
-const requirePayment = require('../middleware/requirePayment')
+const { createGatewayMiddleware } = require('@circle-fin/x402-batching/server')
+const gateway = createGatewayMiddleware({
+  sellerAddress: process.env.API_WALLET_ADDRESS,
+  networks: 'arcTestnet',
+  description: 'AgentPay Weather API - Pay-per-use on Arc Testnet'
+})
 
 const router = express.Router()
 
@@ -45,7 +50,7 @@ const CITIES = {
 const CITIES_LIST = Object.keys(CITIES)
 
 // GET /api/weather?city=london  (requires X-Payment-Id header)
-router.get('/', requirePayment, (req, res) => {
+router.get('/', gateway.require('$0.000001'), (req, res) => {
   const cityKey = (req.query.city || 'new-york').toLowerCase().replace(/\s+/g, '-')
   const weather = CITIES[cityKey] || CITIES[CITIES_LIST[Math.floor(Math.random() * CITIES_LIST.length)]]
 
@@ -61,9 +66,10 @@ router.get('/', requirePayment, (req, res) => {
       },
     },
     payment: {
-      id: req.payment.paymentId,
-      amount: `${req.payment.amount} USDC`,
-      from: req.payment.fromAddress,
+      id: req.payment?.transaction || 'nanopayment',
+      amount: req.payment?.amount || '$0.000001',
+      from: req.payment?.payer || 'agent',
+      verified: req.payment?.verified,
     },
     availableCities: CITIES_LIST,
   })
